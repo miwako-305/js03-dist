@@ -8,15 +8,16 @@
 
 <!-- コンテンツ表示画面 -->
 
-
-
-
-
-
-
-
-
+<div>
+  名前: <input type="text" id="uname">
+</div>
+<div>
+  <textarea name="" id="text" cols="30" rows="10"></textarea>
+  <button id="send">送信</button>
+</div>
+<div id="output"></div>
 <!--/ コンテンツ表示画面 -->
+
 
 
 
@@ -44,8 +45,21 @@
       appId: "1:908425589353:web:439ba45ce57077cc63e8f8"
     };
   
+
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const dbRef = ref(db, 'chat');
+    $('#send').on('click', function () {
+        const msg = {
+            uname: $('#uname').val(),
+            text: $('#text').val()
+        }
+        const newPostRef = push(dbRef);
+        set(newPostRef, msg);
+    });
+
+
 </script>    
 
 

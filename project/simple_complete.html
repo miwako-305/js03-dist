@@ -3,20 +3,32 @@
 <head>
 <meta charset="utf-8">
 <title>Chatアプリ</title>
+<style>
+    #output {
+      height: 300px;
+      width: 220px;
+      overflow-y: scroll;
+    }
+    #output {
+      background-color: rgb(227, 224, 224);
+    }
+  </style>
 </head>
 <body>
 
 <!-- コンテンツ表示画面 -->
 
 <div>
+    <div id="output"></div>
     <div>
         名前: <input type="text" id="uname">
     </div>
     <div>
         <textarea name="" id="text" cols="30" rows="10"></textarea>
         <button id="send">送信</button>
+        <button id="delete">全削除</button>
     </div>
-    <div id="output"></div>
+   
 </div>
 
 <!--/ コンテンツ表示画面 -->
@@ -39,20 +51,20 @@
   
     // Your web app's Firebase configuration
     const firebaseConfig = {
-      apiKey: "****",
-      authDomain: "fir-demo-962b2.firebaseapp.com",
-      projectId: "fir-demo-962b2",
-      storageBucket: "fir-demo-962b2.appspot.com",
-      messagingSenderId: "767762019644",
-      appId: "1:767762019644:web:8774d86f7a4062515a9a39"
+      apiKey: "AIzaSyC9OHBtnJ2xthayvx3fw_7jcqekZNTwwdE",
+      authDomain: "fir-demo-cec28.firebaseapp.com",
+      projectId: "fir-demo-cec28",
+      storageBucket: "fir-demo-cec28.appspot.com",
+      messagingSenderId: "908425589353",
+      appId: "1:908425589353:web:439ba45ce57077cc63e8f8"
     };
   
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
-
     const db = getDatabase(app); // RealtimeDBに接続
     const dbRef = ref(db, "chat"); // RealtimeDB内の"chat"を使う
-
+    
+    //データを追加(Firebase)//
     $("#send").on("click", function () {
         const msg = {
             uname: $("#uname").val(),
@@ -61,17 +73,52 @@
         const newPostRef = push(dbRef); // pushできる状態にする
         set(newPostRef, msg); // DBに値を送信
     });
-
+    //データを追加表示(Window)//
     onChildAdded(dbRef, function (data) {
         const msg = data.val();
+        // console.log(msg);
         const key = data.key;
-        let h = "<p>";
-        h += msg.uname;
-        h += "<br>";
-        h += msg.text;
-        h += "</p>";
+        // console.log(key);
+        const h = `<p id="${key}" class="message">${msg.uname}: ${msg.text}</p>`; // id="${key} class="messages"
+        // console.log(h);
         $("#output").append(h); // #output の最後に追加
     });
+    //データを一部削除//
+    $('#output').on('click','.message', function(){
+    const thisKey = $(this).attr("id");
+    const dltKey = "chat/"+thisKey;
+    remove(ref(db, dltKey));
+    });
+    
+    onChildRemoved(dbRef,function(data){
+    const key = `#`+data.key;
+    $(key).remove();
+    });
+
+    //データを全削除(Firebase)// 
+    $("#delete").on("click", function () {
+        remove(dbRef); // RealtimeDB内の"chat"を消す
+        // alert(dbRef);// 動いているかを確認
+    });
+    //データを全削除(Window)// 
+    onChildRemoved(dbRef, function (data) {
+        const key = data.key;
+        $(key).remove();
+    });
+
+    $('#text').on('keydown',function(e){
+        if(e.keyCode === 13) {
+            const msg = {
+            uname: $("#uname").val(),
+            text: $("#text").val()
+        }
+        const newPostRef = push(dbRef); // pushできる状態にする
+        set(newPostRef, msg); // DBに値を送信    
+        }
+    })
+
+
+
 </script>
 </body>
 </html>
